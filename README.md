@@ -14,7 +14,7 @@ with a qualitative rating and a GPU‑ vs CPU‑bound bottleneck read‑out.
 
 ## Features
 
-- **Searchable dropdowns** for ~20 popular games, ~45 GPUs and ~35 CPUs
+- **Searchable dropdowns** for 220+ popular games, 120+ GPUs (desktop, laptop & handheld) and 85 CPUs
 - **Resolution** (1080p / 1440p / 4K), **preset** (Low / Medium / High / Ultra) and **RAM** (8–64 GB)
 - **Ray tracing** and **DLSS / FSR / XeSS upscaling** toggles — the two biggest real‑world FPS levers, auto‑disabled for games that don't support them
 - **Live results** — no submit button; everything updates as you change a control
