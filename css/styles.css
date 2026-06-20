@@ -359,11 +359,11 @@ body::before {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 6%;
+  bottom: 2%;
   text-align: center;
 }
 .fps-number {
-  font-size: clamp(3rem, 9vw, 4.1rem);
+  font-size: clamp(2.5rem, 7vw, 3.4rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.03em;
