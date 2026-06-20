@@ -179,6 +179,7 @@ function createSegmented(mount, cfg) {
     const btn = el("button", "seg-btn", escapeHtml(opt.label));
     btn.type = "button";
     btn.addEventListener("click", () => {
+      if (mount.classList.contains("disabled")) return;
       if (current === opt.value) return;
       current = opt.value;
       sync();
@@ -200,6 +201,9 @@ function createSegmented(mount, cfg) {
     },
     getValue() {
       return current;
+    },
+    setDisabled(disabled) {
+      mount.classList.toggle("disabled", disabled);
     },
   };
 }

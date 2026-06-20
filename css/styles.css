@@ -315,6 +315,18 @@ body::before {
 }
 [data-theme="light"] .seg-btn.active { color: #fff; }
 
+.segmented.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.6);
+}
+.field-label .label-note {
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-faint);
+}
+
 /* ─────────────────────────── Result card ─────────────────────────── */
 .result-head {
   display: flex;

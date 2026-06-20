@@ -13,6 +13,8 @@
     resolution: "1080p",
     preset: "High",
     ram: 16,
+    rt: false,
+    upscaling: "Off",
   };
 
   const RATING_COLORS = {
@@ -77,6 +79,47 @@
     onChange: (v) => set("ram", v),
   });
 
+  const rtSeg = createSegmented(byAttr("data-segmented", "rt"), {
+    options: [
+      { label: "Off", value: false },
+      { label: "On", value: true },
+    ],
+    value: state.rt,
+    onChange: (v) => set("rt", v),
+  });
+
+  const upSeg = createSegmented(byAttr("data-segmented", "upscaling"), {
+    options: ["Off", "Quality", "Balanced", "Performance"].map((u) => ({ label: u, value: u })),
+    value: state.upscaling,
+    onChange: (v) => set("upscaling", v),
+  });
+
+  const rtLabel = document.getElementById("rtLabel");
+  const upLabel = document.getElementById("upLabel");
+
+  // Enable/disable the RT + upscaling controls based on what the game supports.
+  function applyGameCapabilities() {
+    const g = state.game;
+    if (g.rt) {
+      rtSeg.setDisabled(false);
+      rtLabel.innerHTML = "Ray tracing";
+    } else {
+      state.rt = false;
+      rtSeg.setValue(false);
+      rtSeg.setDisabled(true);
+      rtLabel.innerHTML = 'Ray tracing <span class="label-note">· not supported</span>';
+    }
+    if (g.up) {
+      upSeg.setDisabled(false);
+      upLabel.innerHTML = 'Upscaling <span class="label-note">(DLSS / FSR / XeSS)</span>';
+    } else {
+      state.upscaling = "Off";
+      upSeg.setValue("Off");
+      upSeg.setDisabled(true);
+      upLabel.innerHTML = 'Upscaling <span class="label-note">· not supported</span>';
+    }
+  }
+
   // Seed the selects with their default values.
   gameSelect.setValue(state.game);
   gpuSelect.setValue(state.gpu);
@@ -85,6 +128,7 @@
   // ── State + render ───────────────────────────────────────────────────────
   function set(key, value) {
     state[key] = value;
+    if (key === "game") applyGameCapabilities();
     render();
   }
 
@@ -120,7 +164,11 @@
       "color-mix(in srgb, " + bottleneckColor(result.bottleneck) + " 18%, transparent)";
     elBottleIcon.style.color = bottleneckColor(result.bottleneck);
 
-    elContext.textContent = `${state.resolution} · ${state.preset} · ${state.ram} GB`;
+    let ctx = `${state.resolution} · ${state.preset}`;
+    if (result.rtActive) ctx += " · RT on";
+    if (result.upActive) ctx += ` · ${result.upMode} upscaling`;
+    ctx += ` · ${state.ram} GB`;
+    elContext.textContent = ctx;
   }
 
   function animateNumber(from, to) {
@@ -169,5 +217,6 @@
   }
 
   // First paint.
+  applyGameCapabilities();
   render();
 })();

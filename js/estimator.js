@@ -2,18 +2,19 @@
  * FPS estimation model. Pure logic, no DOM. Depends on the global data objects
  * (GPU_DATA, CPU_DATA, GAME_DATA, FPS_CONFIG) loaded before this file.
  *
- * The model is intentionally simple and transparent:
- *   - Each GPU/CPU has a relative performance score.
- *   - Each game has GPU and CPU demand factors.
- *   - We compute a GPU-bound FPS and a CPU-bound FPS, take the lower of the two
- *     (that component is the bottleneck), then apply a RAM penalty and any cap.
+ * Two ceilings are computed and the lower one wins (that's the bottleneck):
+ *
+ *   gpuBoundFps = gpuFactor * gpuScore * resScale * presetGpu * upscale * rt
+ *   cpuBoundFps = cpuFactor * cpuScore * presetCpu
+ *   fps         = min(gpuBoundFps, cpuBoundFps) * ramFactor   (then clamp to cap)
+ *
+ * The per-game baseline is NATIVE-resolution RASTER. Ray tracing multiplies the
+ * GPU-bound number down (game.rt); upscaling multiplies it up (config.upscaling)
+ * but never raises the CPU ceiling — so heavy upscaling can leave you CPU-bound.
  */
 
 /**
- * @param {{game:object, gpu:object, cpu:object, resolution:string, preset:string, ram:number}} sel
- * @returns {{fps:number, rawFps:number, gpuBoundFps:number, cpuBoundFps:number,
- *            bottleneck:'GPU'|'CPU'|'Balanced', rating:object, ramLimited:boolean,
- *            capped:boolean, gaugePct:number}}
+ * @param {{game,gpu,cpu,resolution,preset,ram, rt?:boolean, upscaling?:string}} sel
  */
 function estimateFps(sel) {
   const cfg = FPS_CONFIG;
@@ -23,11 +24,19 @@ function estimateFps(sel) {
   const presetGpu = cfg.presetGpuScale[preset];
   const presetCpu = cfg.presetCpuScale[preset];
 
+  // Ray tracing: only if the game supports it (game.rt is the raster→RT factor).
+  const rtActive = !!(sel.rt && game.rt);
+  const rtMult = rtActive ? game.rt : 1;
+
+  // Upscaling: only if the game supports it and a mode other than "Off".
+  const upMode = sel.upscaling || "Off";
+  const upActive = !!(game.up && upMode !== "Off");
+  const upMult = upActive ? cfg.upscaling[upMode][resolution] : 1;
+
   // Two independent ceilings.
-  const gpuBoundFps = game.gpuFactor * gpu.score * resScale * presetGpu;
+  const gpuBoundFps = game.gpuFactor * gpu.score * resScale * presetGpu * rtMult * upMult;
   const cpuBoundFps = game.cpuFactor * cpu.score * presetCpu;
 
-  // The lower ceiling wins — that's the real-world frame rate before RAM/caps.
   let fps = Math.min(gpuBoundFps, cpuBoundFps);
 
   // RAM penalty.
@@ -54,6 +63,9 @@ function estimateFps(sel) {
     rawFps,
     gpuBoundFps,
     cpuBoundFps,
+    rtActive,
+    upActive,
+    upMode,
     bottleneck: classifyBottleneck(gpuBoundFps, cpuBoundFps, capped, cfg),
     rating: ratingFor(fps, cfg),
     ramLimited,
@@ -84,7 +96,7 @@ function ratingFor(fps, cfg) {
 function bottleneckText(result, sel) {
   switch (result.bottleneck) {
     case "GPU":
-      return `GPU-bound — your ${shortName(sel.gpu.name)} is the main limiter. Lowering the resolution or preset will help the most.`;
+      return `GPU-bound — your ${shortName(sel.gpu.name)} is the main limiter. Lowering the resolution or preset${sel.game.up ? ", or turning on upscaling," : ""} will help the most.`;
     case "CPU":
       return `CPU-bound — your ${shortName(sel.cpu.name)} is the main limiter. Lowering resolution won't help much; this game leans hard on the processor.`;
     case "Capped":
