@@ -62,15 +62,14 @@
             <div class="select" data-select="game" id="select-game"></div>
           </div>
 
-          <div class="field-row">
-            <div class="field">
-              <label class="field-label">Resolution</label>
-              <div class="segmented" data-segmented="resolution"></div>
-            </div>
-            <div class="field">
-              <label class="field-label">Graphics preset</label>
-              <div class="segmented" data-segmented="preset"></div>
-            </div>
+          <div class="field">
+            <label class="field-label">Resolution</label>
+            <div class="segmented" data-segmented="resolution"></div>
+          </div>
+
+          <div class="field">
+            <label class="field-label">Graphics preset</label>
+            <div class="segmented" data-segmented="preset"></div>
           </div>
 
           <div class="field">
@@ -83,14 +82,19 @@
             <div class="select" data-select="cpu" id="select-cpu"></div>
           </div>
 
+          <div class="field">
+            <label class="field-label">System memory (RAM)</label>
+            <div class="segmented" data-segmented="ram"></div>
+          </div>
+
           <div class="field-row">
-            <div class="field">
-              <label class="field-label">System memory (RAM)</label>
-              <div class="segmented" data-segmented="ram"></div>
-            </div>
             <div class="field">
               <label class="field-label" id="rtLabel">Ray tracing</label>
               <div class="segmented" data-segmented="rt"></div>
+            </div>
+            <div class="field">
+              <label class="field-label" id="fgLabel">Frame Generation</label>
+              <div class="segmented" data-segmented="framegen"></div>
             </div>
           </div>
 
@@ -139,12 +143,35 @@
             <span class="bottleneck-text" id="bottleneckText"></span>
           </div>
 
+          <p class="game-tip" id="gameTip" hidden>
+            <span class="tip-mark" aria-hidden="true">💡</span>
+            <span id="gameTipText"></span>
+          </p>
+
           <p class="disclaimer">
             These are rough approximations from a tuneable model — not real benchmarks. Actual FPS varies with
             drivers, in-game settings, background apps and individual scenes.
           </p>
         </section>
       </main>
+
+      <!-- Optional: full resolution × preset breakdown -->
+      <section class="card breakdown" id="breakdownCard">
+        <button class="breakdown-toggle" id="breakdownToggle" aria-expanded="false" aria-controls="breakdownBody">
+          <span class="bt-text">
+            <span class="bt-title">Full settings breakdown</span>
+            <span class="bt-sub">See every resolution × preset at once for this hardware</span>
+          </span>
+          <svg class="bt-chevron" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="breakdown-body" id="breakdownBody" hidden>
+          <p class="bd-caption" id="bdCaption"></p>
+          <div class="bd-table-wrap">
+            <table class="bd-table" id="bdTable"></table>
+          </div>
+          <p class="bd-foot">Each cell is the estimated average FPS at that resolution and preset, keeping your GPU, CPU, RAM, ray tracing, upscaling and Frame Gen as selected.</p>
+        </div>
+      </section>
 
       <footer class="footer">
         <span>Built as a clean, extendable estimator · data lives in editable <code>/data/*.js</code> files</span>

@@ -15,6 +15,7 @@ const FPS_CONFIG = {
   resolutionScale: {
     "1080p": 1.0,
     "1440p": 0.70,
+    "1440p UW": 0.60, // 3440×1440 ultrawide (≈2.4× the pixels of 1080p)
     "4K": 0.42,
   },
 
@@ -39,10 +40,10 @@ const FPS_CONFIG = {
   // can leave you CPU-bound. Bigger uplift at higher output resolutions
   // (more pixels saved). Frame-generation is intentionally excluded.
   upscaling: {
-    Off: { "1080p": 1.0, "1440p": 1.0, "4K": 1.0 },
-    Quality: { "1080p": 1.22, "1440p": 1.33, "4K": 1.5 },
-    Balanced: { "1080p": 1.35, "1440p": 1.5, "4K": 1.75 },
-    Performance: { "1080p": 1.5, "1440p": 1.7, "4K": 2.0 },
+    Off: { "1080p": 1.0, "1440p": 1.0, "1440p UW": 1.0, "4K": 1.0 },
+    Quality: { "1080p": 1.22, "1440p": 1.33, "1440p UW": 1.4, "4K": 1.5 },
+    Balanced: { "1080p": 1.35, "1440p": 1.5, "1440p UW": 1.6, "4K": 1.75 },
+    Performance: { "1080p": 1.5, "1440p": 1.7, "1440p UW": 1.85, "4K": 2.0 },
   },
 
   // RAM penalty. ratio = installedRam / game.recRam.
@@ -63,6 +64,11 @@ const FPS_CONFIG = {
 
   // Bottleneck classification: within this fraction = "balanced".
   bottleneck: { balanceBand: 0.12 },
+
+  // Frame Generation (DLSS 3 / FSR 3) multiplies the FINAL displayed FPS. Real
+  // uplift is typically ~1.6–2.0× (it inserts interpolated frames). It does not
+  // improve responsiveness — input latency tracks the pre-FG framerate.
+  frameGenFactor: 1.8,
 
   // Upper bound of the visual gauge (FPS at a full arc).
   gaugeMaxFps: 240,

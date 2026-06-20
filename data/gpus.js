@@ -127,10 +127,38 @@ const GPU_DATA = [
   { name: "Intel Arc A580",           score: 32,  vram: 8,  brand: "Intel" },
   { name: "Intel Arc A380",           score: 16,  vram: 6,  brand: "Intel" },
 
+  // ── Laptop / mobile GPUs ──
+  // Mobile parts are power-limited; performance varies a LOT with the laptop's
+  // TGP (wattage) and cooling. Scores assume a typical higher-wattage config.
+  { name: "NVIDIA RTX 5090 Laptop",   score: 84,  vram: 24, brand: "Laptop" },
+  { name: "NVIDIA RTX 5080 Laptop",   score: 70,  vram: 16, brand: "Laptop" },
+  { name: "NVIDIA RTX 5070 Ti Laptop", score: 56, vram: 12, brand: "Laptop" },
+  { name: "NVIDIA RTX 5070 Laptop",   score: 44,  vram: 8,  brand: "Laptop" },
+  { name: "NVIDIA RTX 4090 Laptop",   score: 78,  vram: 16, brand: "Laptop" },
+  { name: "NVIDIA RTX 4080 Laptop",   score: 66,  vram: 12, brand: "Laptop" },
+  { name: "NVIDIA RTX 4070 Laptop",   score: 46,  vram: 8,  brand: "Laptop" },
+  { name: "NVIDIA RTX 4060 Laptop",   score: 35,  vram: 8,  brand: "Laptop" },
+  { name: "NVIDIA RTX 4050 Laptop",   score: 27,  vram: 6,  brand: "Laptop" },
+  { name: "NVIDIA RTX 3080 Ti Laptop", score: 52, vram: 16, brand: "Laptop" },
+  { name: "NVIDIA RTX 3070 Ti Laptop", score: 44, vram: 8,  brand: "Laptop" },
+  { name: "NVIDIA RTX 3070 Laptop",   score: 41,  vram: 8,  brand: "Laptop" },
+  { name: "NVIDIA RTX 3060 Laptop",   score: 31,  vram: 6,  brand: "Laptop" },
+  { name: "NVIDIA RTX 3050 Laptop",   score: 19,  vram: 4,  brand: "Laptop" },
+  { name: "NVIDIA RTX 2070 Laptop",   score: 30,  vram: 8,  brand: "Laptop" },
+  { name: "NVIDIA RTX 2060 Laptop",   score: 26,  vram: 6,  brand: "Laptop" },
+  { name: "NVIDIA GTX 1660 Ti Laptop", score: 22, vram: 6,  brand: "Laptop" },
+  { name: "NVIDIA GTX 1650 Laptop",   score: 13,  vram: 4,  brand: "Laptop" },
+  { name: "AMD RX 7900M",             score: 60,  vram: 16, brand: "Laptop" },
+  { name: "AMD RX 6800M",             score: 45,  vram: 12, brand: "Laptop" },
+
   // ── Integrated / Handheld (shared memory) ──
+  { name: "ASUS ROG Ally X (Z1 Extreme)",  score: 15, vram: 8, brand: "Handheld" },
+  { name: "ASUS ROG Ally (Z1 Extreme)",    score: 14, vram: 6, brand: "Handheld" },
+  { name: "Lenovo Legion Go (Z1 Extreme)", score: 14, vram: 7, brand: "Handheld" },
+  { name: "Steam Deck (LCD / OLED)",       score: 9,  vram: 4, brand: "Handheld" },
+  { name: "MSI Claw (Arc)",                score: 11, vram: 8, brand: "Handheld" },
   { name: "AMD Radeon 780M (iGPU)",   score: 14,  vram: 8,  brand: "Integrated" },
   { name: "AMD Radeon 760M (iGPU)",   score: 10,  vram: 6,  brand: "Integrated" },
-  { name: "Steam Deck (Van Gogh)",    score: 9,   vram: 4,  brand: "Integrated" },
   { name: "Intel Arc 140V (iGPU)",    score: 13,  vram: 8,  brand: "Integrated" },
   { name: "Intel Iris Xe (96 EU)",    score: 6,   vram: 4,  brand: "Integrated" },
 ];

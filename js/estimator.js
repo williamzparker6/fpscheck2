@@ -31,7 +31,7 @@ function estimateFps(sel) {
   // Upscaling: only if the game supports it and a mode other than "Off".
   const upMode = sel.upscaling || "Off";
   const upActive = !!(game.up && upMode !== "Off");
-  const upMult = upActive ? cfg.upscaling[upMode][resolution] : 1;
+  const upMult = upActive ? cfg.upscaling[upMode][resolution] || 1 : 1;
 
   // Two independent ceilings.
   const gpuBoundFps = game.gpuFactor * gpu.score * resScale * presetGpu * rtMult * upMult;
@@ -47,6 +47,14 @@ function estimateFps(sel) {
   const ramLimited = ramFactor < 1;
   fps *= ramFactor;
 
+  // FPS before Frame Generation (this is also what input latency tracks).
+  const baseFps = Math.max(1, Math.round(fps));
+
+  // Frame Generation (DLSS 3 / FSR 3): inserts interpolated frames, multiplying
+  // the displayed FPS — but it does NOT improve responsiveness.
+  const fgActive = !!(sel.frameGen && game.fg);
+  if (fgActive) fps *= cfg.frameGenFactor;
+
   const rawFps = fps;
 
   // Hard engine cap (e.g. Elden Ring @ 60).
@@ -60,12 +68,14 @@ function estimateFps(sel) {
 
   return {
     fps,
+    baseFps,
     rawFps,
     gpuBoundFps,
     cpuBoundFps,
     rtActive,
     upActive,
     upMode,
+    fgActive,
     bottleneck: classifyBottleneck(gpuBoundFps, cpuBoundFps, capped, cfg),
     rating: ratingFor(fps, cfg),
     ramLimited,

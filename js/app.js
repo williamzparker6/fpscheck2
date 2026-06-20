@@ -15,6 +15,7 @@
     ram: 16,
     rt: false,
     upscaling: "Off",
+    frameGen: false,
   };
 
   const RATING_COLORS = {
@@ -61,6 +62,7 @@
     options: [
       { label: "1080p", value: "1080p" },
       { label: "1440p", value: "1440p" },
+      { label: "1440p UW", value: "1440p UW" },
       { label: "4K", value: "4K" },
     ],
     value: state.resolution,
@@ -94,29 +96,46 @@
     onChange: (v) => set("upscaling", v),
   });
 
+  const fgSeg = createSegmented(byAttr("data-segmented", "framegen"), {
+    options: [
+      { label: "Off", value: false },
+      { label: "On", value: true },
+    ],
+    value: state.frameGen,
+    onChange: (v) => set("frameGen", v),
+  });
+
   const rtLabel = document.getElementById("rtLabel");
   const upLabel = document.getElementById("upLabel");
+  const fgLabel = document.getElementById("fgLabel");
 
-  // Enable/disable the RT + upscaling controls based on what the game supports.
+  // Enable/disable the RT, upscaling and Frame Gen controls per game support.
   function applyGameCapabilities() {
     const g = state.game;
-    if (g.rt) {
-      rtSeg.setDisabled(false);
-      rtLabel.innerHTML = "Ray tracing";
-    } else {
+    setCapability(rtSeg, rtLabel, g.rt, "Ray tracing", () => {
       state.rt = false;
       rtSeg.setValue(false);
-      rtSeg.setDisabled(true);
-      rtLabel.innerHTML = 'Ray tracing <span class="label-note">· not supported</span>';
-    }
-    if (g.up) {
-      upSeg.setDisabled(false);
-      upLabel.innerHTML = 'Upscaling <span class="label-note">(DLSS / FSR / XeSS)</span>';
-    } else {
+    });
+    setCapability(upSeg, upLabel, g.up, 'Upscaling <span class="label-note">(DLSS / FSR / XeSS)</span>', () => {
       state.upscaling = "Off";
       upSeg.setValue("Off");
-      upSeg.setDisabled(true);
-      upLabel.innerHTML = 'Upscaling <span class="label-note">· not supported</span>';
+    });
+    setCapability(fgSeg, fgLabel, g.fg, 'Frame Generation <span class="label-note">(DLSS 3 / FSR 3)</span>', () => {
+      state.frameGen = false;
+      fgSeg.setValue(false);
+    });
+  }
+
+  function setCapability(seg, label, supported, enabledHtml, resetOff) {
+    if (supported) {
+      seg.setDisabled(false);
+      label.innerHTML = enabledHtml;
+    } else {
+      resetOff();
+      seg.setDisabled(true);
+      // Strip any parenthetical note, then mark unsupported.
+      const base = enabledHtml.replace(/\s*<span class="label-note">.*$/, "");
+      label.innerHTML = base + ' <span class="label-note">· not supported</span>';
     }
   }
 
@@ -139,8 +158,17 @@
   const elBottleText = document.getElementById("bottleneckText");
   const elBottleIcon = document.getElementById("bottleneckIcon");
   const elContext = document.getElementById("resultContext");
+  const elTip = document.getElementById("gameTip");
+  const elTipText = document.getElementById("gameTipText");
   const resultCard = document.querySelector(".card.result");
   const GAUGE_LEN = 377; // ≈ π · r(120)
+
+  // Breakdown table elements + visibility state.
+  const bdToggle = document.getElementById("breakdownToggle");
+  const bdBody = document.getElementById("breakdownBody");
+  const bdTable = document.getElementById("bdTable");
+  const bdCaption = document.getElementById("bdCaption");
+  let breakdownOpen = false;
 
   let lastFps = 0;
 
@@ -164,12 +192,60 @@
       "color-mix(in srgb, " + bottleneckColor(result.bottleneck) + " 18%, transparent)";
     elBottleIcon.style.color = bottleneckColor(result.bottleneck);
 
+    // Frame Gen note appended to the bottleneck explanation.
+    if (result.fgActive) {
+      elBottleText.innerHTML +=
+        ` <span class="fg-note">Frame Gen shows ~${result.fps} FPS but responsiveness still feels like ~${result.baseFps}.</span>`;
+    }
+
+    // Per-game tip.
+    if (state.game.note) {
+      elTipText.textContent = state.game.note;
+      elTip.hidden = false;
+    } else {
+      elTip.hidden = true;
+    }
+
     let ctx = `${state.resolution} · ${state.preset}`;
     if (result.rtActive) ctx += " · RT on";
     if (result.upActive) ctx += ` · ${result.upMode} upscaling`;
+    if (result.fgActive) ctx += " · Frame Gen";
     ctx += ` · ${state.ram} GB`;
     elContext.textContent = ctx;
+
+    if (breakdownOpen) renderBreakdown();
   }
+
+  // ── Optional full breakdown table (resolution × preset) ──────────────────
+  const BD_RES = ["1080p", "1440p", "1440p UW", "4K"];
+  const BD_PRE = ["Low", "Medium", "High", "Ultra"];
+
+  function renderBreakdown() {
+    let html = "<thead><tr><th></th>";
+    for (const res of BD_RES) html += `<th>${res}</th>`;
+    html += "</tr></thead><tbody>";
+    for (const pre of BD_PRE) {
+      html += `<tr><th>${pre}</th>`;
+      for (const res of BD_RES) {
+        const r = estimateFps({ ...state, resolution: res, preset: pre });
+        html += `<td style="--cell:${RATING_COLORS[r.rating.key]}"><span>${r.fps}</span></td>`;
+      }
+      html += "</tr>";
+    }
+    html += "</tbody>";
+    bdTable.innerHTML = html;
+    bdCaption.textContent =
+      `${shortName(state.game.name)} · ${shortName(state.gpu.name)} + ${shortName(state.cpu.name)}` +
+      `${state.rt ? " · RT" : ""}${state.upscaling !== "Off" ? " · " + state.upscaling : ""}${state.frameGen ? " · Frame Gen" : ""}`;
+  }
+
+  bdToggle.addEventListener("click", () => {
+    breakdownOpen = !breakdownOpen;
+    bdBody.hidden = !breakdownOpen;
+    bdToggle.setAttribute("aria-expanded", String(breakdownOpen));
+    bdToggle.classList.toggle("open", breakdownOpen);
+    if (breakdownOpen) renderBreakdown();
+  });
 
   function animateNumber(from, to) {
     elFps.classList.remove("bump");
