@@ -1,0 +1,17 @@
+{
+  "name": "fps-estimator",
+  "version": "1.0.0",
+  "description": "Estimate the average FPS you'll get in popular PC games based on your GPU, CPU, resolution, graphics preset and RAM.",
+  "scripts": {
+    "start": "node tools/serve.js",
+    "screenshot": "node tools/screenshot.js"
+  },
+  "keywords": ["fps", "gaming", "benchmark", "estimator", "pc-gaming", "gpu", "cpu"],
+  "license": "MIT",
+  "private": true,
+  "comment": "The app itself is 100% dependency-free static HTML/CSS/JS. devDependencies are ONLY for the optional screenshot tool in tools/screenshot.js.",
+  "devDependencies": {
+    "@sparticuz/chromium": "^149.0.0",
+    "puppeteer-core": "^25.1.0"
+  }
+}
